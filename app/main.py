@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -11,7 +12,26 @@ from pydantic import BaseModel, Field
 from src.scorecard.logistic_model import LogisticScorecard
 
 app = FastAPI(title="Credit Risk Governance Demo", version="0.1.0")
-scorecard: LogisticScorecard | None = None
+
+
+def build_demo_scorecard() -> LogisticScorecard:
+    """Train a deterministic toy model so the local preview has a working score endpoint."""
+    rng = np.random.default_rng(42)
+    frame = pd.DataFrame(
+        {
+            "income": rng.normal(60000, 15000, 160).clip(18000),
+            "debt_to_income": rng.uniform(0.1, 0.8, 160),
+            "credit_history_months": rng.integers(6, 240, 160),
+            "prior_delinquencies": rng.poisson(0.7, 160),
+        }
+    )
+    risk = 2.8 * frame["debt_to_income"] - frame["income"] / 90000 - frame["credit_history_months"] / 400 + frame["prior_delinquencies"] * 0.35
+    probability = 1 / (1 + np.exp(-risk))
+    target = (rng.random(len(frame)) < probability).astype(int)
+    return LogisticScorecard(iv_threshold=0.0).fit(frame, pd.Series(target))
+
+
+scorecard: LogisticScorecard | None = build_demo_scorecard()
 
 
 class Applicant(BaseModel):
