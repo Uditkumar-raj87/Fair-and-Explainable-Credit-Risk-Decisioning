@@ -38,6 +38,19 @@ class Applicant(BaseModel):
     features: dict[str, Any] = Field(description="Feature values matching the trained educational model")
 
 
+@app.get("/")
+def root() -> dict[str, Any]:
+    return {
+        "service": "Credit Risk Governance Demo",
+        "status": "running",
+        "docs": "/docs",
+        "openapi": "/openapi.json",
+        "health": "/health",
+        "score": "/score",
+        "educational_use_only": True,
+    }
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "use": "educational only"}
