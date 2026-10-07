@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "credit-risk-governance"
+version = "0.1.0"
+description = "Educational, non-production credit-risk governance demonstration"
+requires-python = ">=3.10"
+dependencies = ["pandas>=2.0", "numpy>=1.24", "scikit-learn>=1.3"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-q"
